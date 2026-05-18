@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import useAppStore from "./store";
 import TabA from "./TabA";
 import TabB from "./TabB";
@@ -56,6 +57,7 @@ export default function App() {
         <div className="relative z-10 px-4 sm:px-6 py-4 sm:py-8">
           <Auth onLogin={setSession} />
         </div>
+        <Analytics />
       </div>
     );
   }
@@ -180,5 +182,6 @@ export default function App() {
 
 </footer>
     </div>
+    <Analytics />
   </div>
 );}

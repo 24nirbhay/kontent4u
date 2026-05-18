@@ -13,6 +13,40 @@ from supabase import create_client
 
 load_dotenv()
 
+GLOBAL_CREATIVE_PROMPT = """Shorten and optimize this for marketing/content execution.
+
+Rewrite it like a high-level creative brief for reel editors, marketers, and content teams.
+
+Keep:
+- hook
+- emotional beats
+- core concept
+- visual moments
+- audience impact
+- CTA
+- unique selling points
+
+Remove:
+- overexplaining
+- cinematic filler
+- repeated wording
+- corporate jargon
+- unnecessary transitions
+- commentary about strategy/process
+- excessive formatting
+
+Style:
+- fast to scan
+- concise but punchy
+- creator-friendly
+- visually driven
+- emotionally clear
+- high retention energy
+- natural modern wording
+
+Goal:
+Make it feel like something a high-performing social media or ad creative team would actually use internally."""
+
 
 class APIError(Exception):
     def __init__(self, status_code: int, detail: str):
@@ -206,6 +240,10 @@ def generate_with_fallback(prompt: str):
             return '[ERROR] AI Failed. Check Python terminal for details.'
 
 
+def build_agent_prompt(label: str, content: str):
+    return f"{GLOBAL_CREATIVE_PROMPT}\n\nTask: {label}\n\nContent:\n{content}"
+
+
 def get_trends():
     trends = []
 
@@ -244,7 +282,7 @@ def get_trends():
             if normalized:
                 video_id = _extract_youtube_video_id(normalized.get('linkUrl', ''))
                 if video_id:
-                    normalized['embedUrl'] = f'https://www.youtube.com/embed/{video_id}?rel=0&modestbranding=1&playsinline=1'
+                    normalized['embedUrl'] = f'https://www.youtube.com/embed/{video_id}?rel=0&modestbranding=1&playsinline=1&autoplay=1&mute=1&controls=1'
                     normalized['thumbnailUrl'] = f'https://img.youtube.com/vi/{video_id}/hqdefault.jpg'
                 trends.append(normalized)
 
@@ -315,23 +353,23 @@ def build_brainstorm_response(payload: dict, authorization: str):
     user = verify_user(authorization)
     current_count = check_daily_limit(user.email)
 
-    prompt_1 = (
-        f'Draft a video script outline for {target_audience}. '
-        f'Context: {user_prompt}. Tone: {derived_trend_context}.'
+    prompt_1 = build_agent_prompt(
+        'Create the first draft as a concise marketing/content brief for the target audience and context below. Keep it practical and execution-ready.',
+        f'Target audience: {target_audience}\nContext: {user_prompt}\nTone/style: {derived_trend_context}'
     )
     agent_1_draft = generate_with_fallback(prompt_1)
     time.sleep(2)
 
-    prompt_2 = (
-        f'Strictly fact-check this script draft and enforce a '
-        f'{derived_trend_context} tone: {agent_1_draft}'
+    prompt_2 = build_agent_prompt(
+        'Tighten the draft, remove unnecessary wording, and keep only what a content team needs to execute. Preserve meaning and clarity.',
+        agent_1_draft
     )
     agent_2_critique = generate_with_fallback(prompt_2)
     time.sleep(2)
 
-    prompt_3 = (
-        f'Merge this draft: {agent_1_draft} with this critique: '
-        f'{agent_2_critique} into a final polished Markdown script.'
+    prompt_3 = build_agent_prompt(
+        'Merge the draft and critique into a final concise version. Keep only the strongest hook, emotional beats, visual moments, CTA, and audience impact.',
+        f'Draft:\n{agent_1_draft}\n\nCritique:\n{agent_2_critique}'
     )
     final_script = generate_with_fallback(prompt_3)
 

@@ -1,0 +1,1 @@
+/** @type {import('tailwindcss').Config} */ module.exports = { content: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'], theme: { extend: { colors: { 'cinematic': '#0a0a0a', 'neon': '#00f3ff' } } }, plugins: [], }

@@ -52,7 +52,7 @@ export default function App() {
         <div className="absolute inset-0 bg-black/35 z-[1]" />
 
         {/* LOGIN CONTENT */}
-        <div className="relative z-10">
+        <div className="relative z-10 px-4 sm:px-6 py-4 sm:py-8">
           <Auth onLogin={setSession} />
         </div>
       </div>
@@ -80,15 +80,15 @@ export default function App() {
     <div className="relative z-10 flex flex-col min-h-screen">
 
       {/* HEADER */}
-      <header className="px-4 py-2 md:px-5 md:py-3 flex justify-between items-center bg-black/20 border-b border-white/5 sticky top-0 z-50">
+      <header className="px-4 py-3 md:px-5 md:py-3 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center bg-black/20 border-b border-white/5 sticky top-0 z-50 backdrop-blur-sm">
 
         <h1 className="text-lg md:text-xl font-semibold tracking-tight text-white/90">
           kontent<span className="text-[#00f3ff]">4u</span>
         </h1>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
 
-          <span className="text-[11px] text-gray-400 hidden md:block">
+          <span className="text-[11px] text-gray-400 hidden md:block max-w-[220px] truncate">
             {session.user.email}
           </span>
 
@@ -103,16 +103,16 @@ export default function App() {
       </header>
 
       {/* HERO SECTION */}
-      <section className="relative h-[80vh] flex items-center justify-center px-4 text-center">
+      <section className="relative min-h-[56vh] md:min-h-[72vh] flex items-center justify-center px-4 py-8 text-center">
 
         <div className="max-w-2xl">
 
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-tight text-white/90 mb-3">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-white/90 mb-3 leading-tight">
             Generate Content{" "}
             <span className="text-[#00f3ff]">Automatically</span>
           </h2>
 
-          <p className="text-sm md:text-base text-gray-300">
+          <p className="text-sm sm:text-base md:text-base text-gray-300 max-w-xl mx-auto">
             Discover trends, brainstorm ideas, and generate factual scripts.
           </p>
 
@@ -121,7 +121,7 @@ export default function App() {
       </section>
 
       {/* MAIN CONTENT SECTION */}
-      <main className="relative z-20 px-2 md:px-6 pb-10 flex justify-center -mt-4">
+      <main className="relative z-20 px-2 sm:px-3 md:px-6 pb-10 flex justify-center -mt-4">
 
         <div className="w-full max-w-7xl bg-black/35 backdrop-blur-md border border-white/10 rounded-3xl p-3 md:p-5 min-h-[650px] shadow-[0_0_40px_rgba(0,0,0,0.28)] flex flex-col">
 

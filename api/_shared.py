@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import time
 import uuid
 from datetime import date
@@ -107,6 +108,25 @@ def _normalize_trend_item(item, source_platform: str):
         'metrics': f"{_format_number(metrics_value)} Views",
         'linkUrl': link_url,
     }
+
+
+def _extract_youtube_video_id(url: str):
+    if not url:
+        return None
+
+    patterns = [
+        r'youtu\.be/([\w-]{11})',
+        r'youtube\.com/watch\?v=([\w-]{11})',
+        r'youtube\.com/shorts/([\w-]{11})',
+        r'youtube\.com/embed/([\w-]{11})',
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, url)
+        if match:
+            return match.group(1)
+
+    return None
 
 
 def verify_user(authorization: str):
@@ -222,6 +242,10 @@ def get_trends():
         for short in youtube_candidates[:5]:
             normalized = _normalize_trend_item(short, 'YouTube Shorts')
             if normalized:
+                video_id = _extract_youtube_video_id(normalized.get('linkUrl', ''))
+                if video_id:
+                    normalized['embedUrl'] = f'https://www.youtube.com/embed/{video_id}?rel=0&modestbranding=1&playsinline=1'
+                    normalized['thumbnailUrl'] = f'https://img.youtube.com/vi/{video_id}/hqdefault.jpg'
                 trends.append(normalized)
 
     except Exception as yt_error:

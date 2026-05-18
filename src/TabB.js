@@ -1,6 +1,6 @@
 import React, { useState } from 'react'; 
 import useAppStore from './store'; 
-import { Play, Copy, Check, Terminal, Activity, User, Settings, Save } from 'lucide-react'; 
+import { Play, Copy, Check, Terminal, Activity, User, Settings, Save, Sparkles, Loader2, ShieldCheck } from 'lucide-react'; 
 import { supabase } from './Auth'; // Importing the existing client from your Auth file
 
 export default function TabB({ session }) {
@@ -114,8 +114,8 @@ export default function TabB({ session }) {
   };
 
   return (
-    <div className='flex flex-col h-full text-white space-y-4 overflow-y-auto'>
-      <div className='flex flex-col md:flex-row gap-4 mb-2'>
+    <div className='flex flex-col h-full text-white space-y-4 overflow-y-auto pb-4'>
+      <div className='flex flex-col gap-3 md:flex-row md:items-end mb-2'>
         <div className='flex-1 relative'>
           <User className='absolute left-3 top-3 text-gray-400' size={18} />
           <input type='text' value={targetAudienceProfile} onChange={(e) => setTargetAudienceProfile(e.target.value)} placeholder='Target Audience & Context (e.g., Tech Bros)' className='w-full bg-black/50 border border-white/10 rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:border-[#00f3ff] transition' />
@@ -123,32 +123,57 @@ export default function TabB({ session }) {
         <div className='flex-1 relative'>
           <Settings className='absolute left-3 top-3 text-gray-400' size={18} />
           <select value={tone} onChange={(e) => setTone(e.target.value)} className='w-full bg-black/50 border border-white/10 rounded-lg py-2 pl-10 pr-4 appearance-none focus:outline-none focus:border-[#00f3ff] transition text-white'>
-            <option>Professional & Corporate</option>
+            <option>Professional</option>
             <option>Casual & Gen-Z</option>
-            <option>High-Energy YouTube</option>
+            <option>Brainrot YouTube</option>
           </select>
         </div>
-        <div className='flex items-center gap-3'>
-          <button onClick={runSim} disabled={isProcessing} className={'px-6 py-2 rounded-lg font-bold flex items-center justify-center gap-2 transition ' + (isProcessing ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#00f3ff]/20 text-[#00f3ff] hover:bg-[#00f3ff]/40 border border-[#00f3ff]/50')}>
-            {isProcessing ? 'Processing...' : <><Play size={18} /> Run Arena</>}
+        <div className='flex flex-col sm:flex-row items-stretch sm:items-center gap-3'>
+          <button onClick={runSim} disabled={isProcessing} className={'px-6 py-2 rounded-lg font-bold flex items-center justify-center gap-2 transition w-full sm:w-auto ' + (isProcessing ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#00f3ff]/20 text-[#00f3ff] hover:bg-[#00f3ff]/40 border border-[#00f3ff]/50')}>
+            {isProcessing ? <><Loader2 size={18} className='animate-spin' /> Working...</> : <><Play size={18} /> Run Arena</>}
           </button>
 
-          <span className='px-3 py-2 rounded-lg border border-white/10 bg-black/40 text-xs font-semibold text-gray-300 whitespace-nowrap'>
+          <span className='px-3 py-2 rounded-lg border border-white/10 bg-black/40 text-xs font-semibold text-gray-300 whitespace-nowrap flex items-center justify-center gap-2'>
+            <ShieldCheck size={14} className={triesLeft > 0 ? 'text-emerald-400' : 'text-red-400'} />
             Tries left: {triesLeft}/3
           </span>
         </div>
       </div>
       
-      <div className='flex flex-col md:flex-row gap-4 flex-1 min-h-[250px]'>
-        <div className='flex-1 bg-black/40 border border-white/10 rounded-xl p-4 flex flex-col'>
+      <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-[250px]'>
+        <div className='bg-black/40 border border-white/10 rounded-xl p-4 flex flex-col min-h-[250px]'>
           <h3 className='text-sm font-bold text-gray-400 mb-3 flex items-center gap-2'><Terminal size={16} /> Agent Dialogue</h3>
           <div className='flex-1 overflow-y-auto space-y-3'>
-            <div className={'p-3 rounded border ' + (arenaAgentTurnState >= 1 ? 'border-blue-500/50 bg-blue-500/10 text-white' : 'border-white/5 text-gray-600')}>Agent 1: {arenaAgentTurnState >= 1 ? 'Drafting script skeleton...' : 'Waiting...'}</div>
-            <div className={'p-3 rounded border ' + (arenaAgentTurnState >= 2 ? 'border-yellow-500/50 bg-yellow-500/10 text-white' : 'border-white/5 text-gray-600')}>Agent 2: {arenaAgentTurnState >= 2 ? 'Cross-referencing facts...' : 'Waiting...'}</div>
-            <div className={'p-3 rounded border ' + (arenaAgentTurnState >= 3 ? 'border-green-500/50 bg-green-500/10 text-white' : 'border-white/5 text-gray-600')}>Agent 3: {arenaAgentTurnState >= 3 ? 'Compiling final output...' : 'Waiting...'}</div>
+            <div className={'p-3 rounded border flex items-center gap-3 transition ' + (arenaAgentTurnState >= 1 ? 'border-blue-500/50 bg-blue-500/10 text-white shadow-[0_0_20px_rgba(59,130,246,0.12)]' : 'border-white/5 text-gray-600')}>
+              <span className={'flex h-9 w-9 items-center justify-center rounded-full border ' + (arenaAgentTurnState >= 1 ? 'border-blue-400/60 bg-blue-400/10 text-blue-200' : 'border-white/10 bg-white/5')}>
+                <Sparkles size={16} className={arenaAgentTurnState >= 1 ? 'animate-pulse' : ''} />
+              </span>
+              <div>
+                <div className='font-medium'>Agent 1</div>
+                <div className='text-xs'>{arenaAgentTurnState >= 1 ? 'Drafting script skeleton...' : 'Waiting...'}</div>
+              </div>
+            </div>
+            <div className={'p-3 rounded border flex items-center gap-3 transition ' + (arenaAgentTurnState >= 2 ? 'border-yellow-500/50 bg-yellow-500/10 text-white shadow-[0_0_20px_rgba(234,179,8,0.12)]' : 'border-white/5 text-gray-600')}>
+              <span className={'flex h-9 w-9 items-center justify-center rounded-full border ' + (arenaAgentTurnState >= 2 ? 'border-yellow-400/60 bg-yellow-400/10 text-yellow-200' : 'border-white/10 bg-white/5')}>
+                <Activity size={16} className={arenaAgentTurnState >= 2 ? 'animate-pulse' : ''} />
+              </span>
+              <div>
+                <div className='font-medium'>Agent 2</div>
+                <div className='text-xs'>{arenaAgentTurnState >= 2 ? 'Cross-referencing facts...' : 'Waiting...'}</div>
+              </div>
+            </div>
+            <div className={'p-3 rounded border flex items-center gap-3 transition ' + (arenaAgentTurnState >= 3 ? 'border-green-500/50 bg-green-500/10 text-white shadow-[0_0_20px_rgba(34,197,94,0.12)]' : 'border-white/5 text-gray-600')}>
+              <span className={'flex h-9 w-9 items-center justify-center rounded-full border ' + (arenaAgentTurnState >= 3 ? 'border-green-400/60 bg-green-400/10 text-green-200' : 'border-white/10 bg-white/5')}>
+                <ShieldCheck size={16} className={arenaAgentTurnState >= 3 ? 'animate-pulse' : ''} />
+              </span>
+              <div>
+                <div className='font-medium'>Agent 3</div>
+                <div className='text-xs'>{arenaAgentTurnState >= 3 ? 'Compiling final output...' : 'Waiting...'}</div>
+              </div>
+            </div>
           </div>
         </div>
-        <div className='flex-1 bg-black/40 border border-white/10 rounded-xl p-4 flex flex-col'>
+        <div className='bg-black/40 border border-white/10 rounded-xl p-4 flex flex-col min-h-[250px]'>
           <h3 className='text-sm font-bold text-gray-400 mb-3 flex items-center gap-2'><Activity size={16} /> Live System Logs</h3>
           <div className='flex-1 overflow-y-auto font-mono text-xs text-green-400 bg-black/80 p-3 rounded-xl border border-white/5'>
             {logs.map((log, i) => <div key={i}>{'>'} {log}</div>)}

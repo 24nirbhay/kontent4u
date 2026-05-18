@@ -12,6 +12,7 @@ export default function TabA() {
   const [trends, setTrends] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [feedState, setFeedState] = useState('Loading live YouTube trends...');
+  const [hoveredTrendId, setHoveredTrendId] = useState(null);
 
   const fetchTrends = useCallback(async () => {
     try {
@@ -64,11 +65,11 @@ export default function TabA() {
         <div>
           <h2 className='text-2xl font-bold mb-2 flex items-center gap-2'>
             <TrendingUp className='text-[#00f3ff]' />
-            Trend Scraper
+            Trends
           </h2>
 
           <p className='text-gray-400'>
-            Discover live YouTube Shorts trends, with a safe fallback if the API is empty.
+            Discover live YouTube Shorts trends here , insta api ke  liye paisa nahi merepe.
           </p>
         </div>
 
@@ -98,8 +99,38 @@ export default function TabA() {
           trends.map((trend) => (
             <div
               key={trend.id}
-              className='bg-black/50 border border-white/10 rounded-xl p-4 flex flex-col justify-between group hover:border-[#00f3ff]/50 transition'
+              onMouseEnter={() => setHoveredTrendId(trend.id)}
+              onMouseLeave={() => setHoveredTrendId(null)}
+              onFocus={() => setHoveredTrendId(trend.id)}
+              onBlur={() => setHoveredTrendId(null)}
+              className='bg-black/50 border border-white/10 rounded-xl p-4 flex flex-col justify-between group hover:border-[#00f3ff]/50 transition-transform duration-300 hover:-translate-y-1 focus-within:-translate-y-1'
             >
+              {trend.embedUrl && (
+                <div className='mb-3 overflow-hidden rounded-lg border border-white/10 bg-black/70 aspect-video relative'>
+                  {hoveredTrendId === trend.id ? (
+                    <iframe
+                      title={trend.title}
+                      src={trend.embedUrl}
+                      className='absolute inset-0 h-full w-full'
+                      allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+                      referrerPolicy='strict-origin-when-cross-origin'
+                      loading='lazy'
+                    />
+                  ) : (
+                    <img
+                      src={trend.thumbnailUrl}
+                      alt={trend.title}
+                      className='h-full w-full object-cover opacity-85 transition duration-300 group-hover:scale-[1.02]'
+                      loading='lazy'
+                    />
+                  )}
+
+                  <div className='pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-2 text-[11px] text-white/70'>
+                    Hover to preview the short
+                  </div>
+                </div>
+              )}
+
               <div className='mb-4'>
                 <div className='flex justify-between items-start mb-2'>
                   <span className='text-xs font-semibold px-2 py-1 bg-white/10 rounded text-gray-300'>

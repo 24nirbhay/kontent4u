@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import useAppStore from "./store";
 import TabA from "./TabA";
 import TabB from "./TabB";
@@ -58,6 +59,7 @@ export default function App() {
           <Auth onLogin={setSession} />
         </div>
         <Analytics />
+        <SpeedInsights />
       </div>
     );
   }
@@ -183,5 +185,6 @@ export default function App() {
 </footer>
     </div>
     <Analytics />
+    <SpeedInsights />
   </div>
 );}

@@ -5,11 +5,16 @@ import { supabase } from './Auth'; // Importing the existing client from your Au
 
 export default function TabB({ session }) {
   const { targetAudienceProfile, setTargetAudienceProfile, arenaAgentTurnState, setArenaAgentTurnState, finalGeneratedScript, setFinalGeneratedScript } = useAppStore(); 
+  const apiBase = (
+    process.env.REACT_APP_BACKEND_URL ||
+    (window.location.hostname === 'localhost' ? 'http://localhost:5000' : '')
+  ).replace(/\/$/, '');
   const [tone, setTone] = useState('Professional'); 
   const [logs, setLogs] = useState([]); 
   const [isProcessing, setIsProcessing] = useState(false); 
   const [copied, setCopied] = useState(false); 
   const [isSaving, setIsSaving] = useState(false); // New state for the save button
+  const [triesLeft, setTriesLeft] = useState(3);
 
   const runSim = async () => { 
     if(!targetAudienceProfile) return alert('Please enter a target audience/topic first!'); 
@@ -18,7 +23,7 @@ export default function TabB({ session }) {
     setArenaAgentTurnState(1); 
     
     try { 
-      const res = await fetch('http://localhost:5000/api/brainstorm', { 
+      const res = await fetch(`${apiBase}/api/brainstorm`, { 
         method: 'POST', 
         headers: { 
           'Content-Type': 'application/json',
@@ -35,7 +40,15 @@ export default function TabB({ session }) {
       const data = await res.json(); 
       
       if (!res.ok) {
+        if (res.status === 429) {
+          setTriesLeft(0);
+        }
+
         throw new Error(data.detail || 'Backend connection failed.');
+      }
+
+      if (typeof data.remainingUses === 'number') {
+        setTriesLeft(data.remainingUses);
       }
 
       setLogs(prev => [...prev, ...data.logs]); 
@@ -115,9 +128,15 @@ export default function TabB({ session }) {
             <option>High-Energy YouTube</option>
           </select>
         </div>
-        <button onClick={runSim} disabled={isProcessing} className={'px-6 py-2 rounded-lg font-bold flex items-center justify-center gap-2 transition ' + (isProcessing ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#00f3ff]/20 text-[#00f3ff] hover:bg-[#00f3ff]/40 border border-[#00f3ff]/50')}>
-          {isProcessing ? 'Processing...' : <><Play size={18} /> Run Arena</>}
-        </button>
+        <div className='flex items-center gap-3'>
+          <button onClick={runSim} disabled={isProcessing} className={'px-6 py-2 rounded-lg font-bold flex items-center justify-center gap-2 transition ' + (isProcessing ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#00f3ff]/20 text-[#00f3ff] hover:bg-[#00f3ff]/40 border border-[#00f3ff]/50')}>
+            {isProcessing ? 'Processing...' : <><Play size={18} /> Run Arena</>}
+          </button>
+
+          <span className='px-3 py-2 rounded-lg border border-white/10 bg-black/40 text-xs font-semibold text-gray-300 whitespace-nowrap'>
+            Tries left: {triesLeft}/3
+          </span>
+        </div>
       </div>
       
       <div className='flex flex-col md:flex-row gap-4 flex-1 min-h-[250px]'>

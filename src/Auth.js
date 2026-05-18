@@ -1,8 +1,15 @@
 import React, { useState } from 'react'; 
 import { createClient } from '@supabase/supabase-js'; 
 
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'https://placeholder.supabase.co'; 
-const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'placeholder'; 
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL; 
+const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY; 
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error(
+    'Missing Supabase environment variables. Set REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_ANON_KEY.'
+  );
+}
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey); 
 
 export default function Auth({ onLogin }) { 
@@ -15,8 +22,7 @@ export default function Auth({ onLogin }) {
       const { error } = await supabase.auth.signInWithOAuth({ 
         provider: 'google',
         options: {
-          // Explicitly tells Google to send the session data back to port 3000
-          redirectTo: '/App' 
+          redirectTo: window.location.origin 
         }
       }); 
       if (error) throw error; 

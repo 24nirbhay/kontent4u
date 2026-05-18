@@ -17,9 +17,14 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000",
-        "http://127.0.0.1:3000","http://localhost:5000",
-        "http://127.0.0.1:5000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:5000",
+        "http://127.0.0.1:5000",
+        *([f"https://{os.getenv('VERCEL_URL')}"] if os.getenv('VERCEL_URL') else []),
+        *([os.getenv('FRONTEND_URL')] if os.getenv('FRONTEND_URL') else []),
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -288,4 +293,4 @@ def health_check():
 
 @app.get("/")
 def read_root():
-    return {"message": "kontent4u API Backend is running perfectly! Please navigate to http://localhost:3000 to view the user interface."}
+    return {"message": "kontent4u API Backend is running. Use the deployed frontend to access the UI."}

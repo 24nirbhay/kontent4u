@@ -4,6 +4,10 @@ import { TrendingUp, ExternalLink, Send, RefreshCw } from 'lucide-react';
 
 export default function TabA() {
   const { setActiveTab, setTargetAudienceProfile } = useAppStore();
+  const apiBase = (
+    process.env.REACT_APP_BACKEND_URL ||
+    (window.location.hostname === 'localhost' ? 'http://localhost:5000' : '')
+  ).replace(/\/$/, '');
 
   const [trends, setTrends] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -12,7 +16,7 @@ export default function TabA() {
     try {
       setIsLoading(true);
 
-      const res = await fetch('http://localhost:5000/api/trends');
+      const res = await fetch(`${apiBase}/api/trends`);
 
       if (!res.ok) {
         throw new Error('Backend failed');

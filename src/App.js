@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import useAppStore from "./store";
 import TabA from "./TabA";
 import TabB from "./TabB";
+import TabC from "./TabC";
 import Auth, { supabase } from "./Auth";
 
 export default function App() {
@@ -128,7 +129,7 @@ export default function App() {
           {/* TAB NAV */}
           <div className="flex gap-2 border-b border-white/5 pb-3 mb-4 overflow-x-auto whitespace-nowrap">
 
-            {["Trend Scraper", "The Arena", "Transcriber"].map((tab) => (
+            {["Trend Scraper", "The Arena", "Transcript"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -156,18 +157,8 @@ export default function App() {
               <TabB session={session} />
             )}
 
-            {activeTab === "Transcriber" && (
-              <div className="flex flex-col items-center justify-center h-full text-gray-500">
-
-                <span className="text-lg mb-2 text-white/80">
-                  Video Transcriber
-                </span>
-
-                <span className="px-3 py-1 bg-white/[0.05] border border-white/10 rounded-full text-xs">
-                  Feature Coming Soon
-                </span>
-
-              </div>
+            {activeTab === "Transcript" && (
+              <TabC session={session} />
             )}
 
           </div>

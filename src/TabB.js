@@ -15,6 +15,7 @@ export default function TabB({ session }) {
   const [copied, setCopied] = useState(false); 
   const [isSaving, setIsSaving] = useState(false); // New state for the save button
   const [triesLeft, setTriesLeft] = useState(3);
+  const [agentStage, setAgentStage] = useState('idle');
 
   useEffect(() => {
     const loadUsage = async () => {
@@ -46,6 +47,7 @@ export default function TabB({ session }) {
   const runSim = async () => { 
     if(!targetAudienceProfile) return alert('Please enter a target audience/topic first!'); 
     setIsProcessing(true); 
+    setAgentStage('agent1');
     setLogs(['[SYSTEM] Initializing Arena...', '[LOG] Verifying Credentials...']); 
     setArenaAgentTurnState(1); 
     
@@ -80,13 +82,16 @@ export default function TabB({ session }) {
 
       setLogs(prev => [...prev, ...data.logs]); 
       setArenaAgentTurnState(2); 
+      setAgentStage('agent2');
       
       setTimeout(() => { 
         setArenaAgentTurnState(3); 
+        setAgentStage('agent3');
         setTimeout(() => { 
           setFinalGeneratedScript(data.finalScript); 
           setIsProcessing(false); 
           setArenaAgentTurnState(0); 
+          setAgentStage('done');
         }, 1500); 
       }, 1500); 
       
@@ -94,6 +99,7 @@ export default function TabB({ session }) {
       setLogs(prev => [...prev, `[ERROR] ${err.message}`]); 
       setIsProcessing(false); 
       setArenaAgentTurnState(0); 
+      setAgentStage('idle');
     } 
   }; 
 
@@ -139,6 +145,8 @@ export default function TabB({ session }) {
       setIsSaving(false);
     }
   };
+
+  const showProcessingSkeleton = isProcessing && !finalGeneratedScript;
 
   return (
     <div className='flex flex-col h-full text-white space-y-4 overflow-y-auto pb-4'>
@@ -198,6 +206,14 @@ export default function TabB({ session }) {
                 <div className='text-xs'>{arenaAgentTurnState >= 3 ? 'Compiling final output...' : 'Waiting...'}</div>
               </div>
             </div>
+
+            {showProcessingSkeleton && (
+              <div className='space-y-2 pt-1'>
+                <div className='h-3 w-5/6 rounded-full bg-white/10 animate-pulse' />
+                <div className='h-3 w-4/6 rounded-full bg-white/10 animate-pulse' />
+                <div className='h-3 w-3/6 rounded-full bg-white/10 animate-pulse' />
+              </div>
+            )}
           </div>
         </div>
         <div className='bg-black/40 border border-white/10 rounded-xl p-4 flex flex-col min-h-[250px]'>
@@ -208,6 +224,14 @@ export default function TabB({ session }) {
           </div>
         </div>
       </div>
+
+      {showProcessingSkeleton && (
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-3'>
+          <div className='h-20 rounded-xl border border-white/10 bg-white/5 animate-pulse' />
+          <div className='h-20 rounded-xl border border-white/10 bg-white/5 animate-pulse' />
+          <div className='h-20 rounded-xl border border-white/10 bg-white/5 animate-pulse' />
+        </div>
+      )}
       
       {finalGeneratedScript && (
         <div className='bg-black/40 border border-[#00f3ff]/50 rounded-xl p-4 mt-4 relative group'>

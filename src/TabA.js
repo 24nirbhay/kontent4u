@@ -98,10 +98,10 @@ export default function TabA() {
           trends.map((trend) => (
             <div
               key={trend.id}
-              className='bg-black/50 border border-white/10 rounded-xl p-4 flex flex-col justify-between group hover:border-[#00f3ff]/50 transition-transform duration-300 hover:-translate-y-1 focus-within:-translate-y-1'
+              className='bg-black/50 border border-white/10 rounded-xl p-3 sm:p-4 flex flex-col justify-between gap-3 group hover:border-[#00f3ff]/50 transition-transform duration-300 hover:-translate-y-1 focus-within:-translate-y-1'
             >
               {trend.embedUrl && (
-                <div className='mb-3 overflow-hidden rounded-lg border border-white/10 bg-black/70 aspect-video relative'>
+                <div className='overflow-hidden rounded-lg border border-white/10 bg-black/70 aspect-video relative'>
                   <iframe
                     title={trend.title}
                     src={trend.embedUrl}
@@ -117,9 +117,9 @@ export default function TabA() {
                 </div>
               )}
 
-              <div className='mb-4'>
-                <div className='flex justify-between items-start mb-2'>
-                  <span className='text-xs font-semibold px-2 py-1 bg-white/10 rounded text-gray-300'>
+              <div className='space-y-3'>
+                <div className='flex justify-between items-start gap-3'>
+                  <span className='text-[11px] sm:text-xs font-semibold px-2 py-1 bg-white/10 rounded text-gray-300 shrink-0'>
                     {trend.sourcePlatform}
                   </span>
 
@@ -127,19 +127,15 @@ export default function TabA() {
                     href={trend.linkUrl}
                     target='_blank'
                     rel='noreferrer'
-                    className='text-gray-500 hover:text-[#00f3ff] transition'
+                    className='text-gray-500 hover:text-[#00f3ff] transition shrink-0'
                   >
                     <ExternalLink size={16} />
                   </a>
                 </div>
 
-                <h3 className='font-bold text-lg leading-tight'>
+                <h3 className='font-bold text-base sm:text-lg leading-tight line-clamp-2'>
                   {trend.title}
                 </h3>
-
-                <p className='text-[#00f3ff] text-sm mt-2'>
-                  {trend.metrics}
-                </p>
               </div>
 
               <button

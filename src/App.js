@@ -173,14 +173,7 @@ export default function App() {
 {/* FOOTER */}
 <footer className="w-full flex justify-center py-1 text-xm text-white/35">
 
-  <a
-    href="https://github.com/24nirbhay"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="hover:text-[#00f3ff]/70 transition"
-  >
-    ~ made by peru
-  </a>
+  ~made by <a href="https://github.com/24nirbhay" target="_blank" rel="noopener noreferrer">peru</a>
 
 </footer>
     </div>

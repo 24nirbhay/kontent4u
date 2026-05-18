@@ -1,4 +1,4 @@
-import React, { useState } from 'react'; 
+import React, { useEffect, useState } from 'react'; 
 import useAppStore from './store'; 
 import { Play, Copy, Check, Terminal, Activity, User, Settings, Save, Sparkles, Loader2, ShieldCheck } from 'lucide-react'; 
 import { supabase } from './Auth'; // Importing the existing client from your Auth file
@@ -15,6 +15,33 @@ export default function TabB({ session }) {
   const [copied, setCopied] = useState(false); 
   const [isSaving, setIsSaving] = useState(false); // New state for the save button
   const [triesLeft, setTriesLeft] = useState(3);
+
+  useEffect(() => {
+    const loadUsage = async () => {
+      if (!session?.access_token) return;
+
+      try {
+        const res = await fetch(`${apiBase}/api/usage`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        });
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        if (typeof data.remainingUses === 'number') {
+          setTriesLeft(data.remainingUses);
+        }
+      } catch (error) {
+        console.error('Failed to load usage count:', error);
+      }
+    };
+
+    loadUsage();
+  }, [apiBase, session?.access_token]);
 
   const runSim = async () => { 
     if(!targetAudienceProfile) return alert('Please enter a target audience/topic first!'); 

@@ -213,6 +213,36 @@ def check_daily_limit(email: str):
     return new_count
 
 
+def get_daily_usage(email: str):
+    today = str(date.today())
+    supabase = get_supabase_client()
+    response = supabase.table('user_usage').select('*').eq('user_email', email).execute()
+
+    if len(response.data) == 0:
+        return {
+            'currentCount': 0,
+            'remainingUses': 3,
+            'lastGenerationDate': today,
+        }
+
+    user_record = response.data[0]
+
+    if user_record['last_generation_date'] != today:
+        return {
+            'currentCount': 0,
+            'remainingUses': 3,
+            'lastGenerationDate': today,
+        }
+
+    current_count = int(user_record.get('generation_count', 0) or 0)
+
+    return {
+        'currentCount': current_count,
+        'remainingUses': max(0, 3 - current_count),
+        'lastGenerationDate': user_record.get('last_generation_date', today),
+    }
+
+
 def generate_with_fallback(prompt: str):
     api_key = get_env('GEMINI_API_KEY')
 

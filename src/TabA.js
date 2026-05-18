@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import useAppStore from './store';
 import { TrendingUp, ExternalLink, Send, RefreshCw } from 'lucide-react';
 
@@ -12,7 +12,7 @@ export default function TabA() {
   const [trends, setTrends] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchTrends = async () => {
+  const fetchTrends = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -31,11 +31,11 @@ export default function TabA() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [apiBase]);
 
   useEffect(() => {
     fetchTrends();
-  }, []);
+  }, [fetchTrends]);
 
   return (
     <div className='flex flex-col h-full text-white'>

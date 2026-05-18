@@ -15,7 +15,6 @@ export default function TabB({ session }) {
   const [copied, setCopied] = useState(false); 
   const [isSaving, setIsSaving] = useState(false); // New state for the save button
   const [triesLeft, setTriesLeft] = useState(3);
-  const [agentStage, setAgentStage] = useState('idle');
 
   useEffect(() => {
     const loadUsage = async () => {
@@ -47,7 +46,6 @@ export default function TabB({ session }) {
   const runSim = async () => { 
     if(!targetAudienceProfile) return alert('Please enter a target audience/topic first!'); 
     setIsProcessing(true); 
-    setAgentStage('agent1');
     setLogs(['[SYSTEM] Initializing Arena...', '[LOG] Verifying Credentials...']); 
     setArenaAgentTurnState(1); 
     
@@ -82,16 +80,13 @@ export default function TabB({ session }) {
 
       setLogs(prev => [...prev, ...data.logs]); 
       setArenaAgentTurnState(2); 
-      setAgentStage('agent2');
       
       setTimeout(() => { 
         setArenaAgentTurnState(3); 
-        setAgentStage('agent3');
         setTimeout(() => { 
           setFinalGeneratedScript(data.finalScript); 
           setIsProcessing(false); 
           setArenaAgentTurnState(0); 
-          setAgentStage('done');
         }, 1500); 
       }, 1500); 
       
@@ -99,7 +94,6 @@ export default function TabB({ session }) {
       setLogs(prev => [...prev, `[ERROR] ${err.message}`]); 
       setIsProcessing(false); 
       setArenaAgentTurnState(0); 
-      setAgentStage('idle');
     } 
   }; 
 

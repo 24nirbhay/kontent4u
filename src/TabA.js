@@ -3,7 +3,7 @@ import useAppStore from './store';
 import { TrendingUp, ExternalLink, Send, RefreshCw } from 'lucide-react';
 
 export default function TabA() {
-  const { setActiveTab, setTargetAudienceProfile } = useAppStore();
+  const { setActiveTab, setTargetAudienceProfile, setScrapedTrendsCache } = useAppStore();
   const apiBase = (
     process.env.REACT_APP_BACKEND_URL ||
     (window.location.hostname === 'localhost' ? 'http://localhost:5000' : '')
@@ -11,6 +11,7 @@ export default function TabA() {
 
   const [trends, setTrends] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [feedState, setFeedState] = useState('Loading live YouTube trends...');
 
   const fetchTrends = useCallback(async () => {
     try {
@@ -24,14 +25,34 @@ export default function TabA() {
 
       const data = await res.json();
 
-      setTrends(Array.isArray(data) ? data : []);
+      const nextTrends = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.trends)
+          ? data.trends
+          : [];
+
+      setTrends(nextTrends);
+      if (nextTrends.length > 0) {
+        setScrapedTrendsCache(nextTrends);
+        setFeedState('Live trends loaded.');
+      } else {
+        setFeedState('No live YouTube trends were returned, showing fallback content if available.');
+      }
     } catch (err) {
       console.error('Failed to fetch trends:', err);
-      setTrends([]);
+      const cachedTrends = useAppStore.getState().scrapedTrendsCache;
+
+      if (Array.isArray(cachedTrends) && cachedTrends.length > 0) {
+        setTrends(cachedTrends);
+        setFeedState('Live fetch failed, showing cached trends.');
+      } else {
+        setTrends([]);
+        setFeedState('No trends available right now.');
+      }
     } finally {
       setIsLoading(false);
     }
-  }, [apiBase]);
+  }, [apiBase, setScrapedTrendsCache]);
 
   useEffect(() => {
     fetchTrends();
@@ -47,7 +68,7 @@ export default function TabA() {
           </h2>
 
           <p className='text-gray-400'>
-            Discover live Reddit + YouTube Shorts trends.
+            Discover live YouTube Shorts trends, with a safe fallback if the API is empty.
           </p>
         </div>
 
@@ -61,6 +82,10 @@ export default function TabA() {
       </div>
 
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto'>
+        <div className='col-span-full text-xs text-gray-400'>
+          {feedState}
+        </div>
+
         {isLoading ? (
           <div className='text-[#00f3ff] animate-pulse'>
             Fetching live trends...

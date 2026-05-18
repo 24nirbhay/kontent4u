@@ -70,6 +70,45 @@ def _format_number(value):
         return str(value or 0)
 
 
+def _normalize_trend_item(item, source_platform: str):
+    if not isinstance(item, dict):
+        return None
+
+    title = (
+        item.get('title')
+        or item.get('videoTitle')
+        or item.get('name')
+        or item.get('snippet', {}).get('title')
+        or 'Trending YouTube Short'
+    )
+
+    if len(title) > 75:
+        title = title[:72] + '...'
+
+    link_url = (
+        item.get('url')
+        or item.get('link')
+        or item.get('videoUrl')
+        or item.get('snippet', {}).get('thumbnails', {}).get('default', {}).get('url')
+        or '#'
+    )
+
+    metrics_value = (
+        item.get('viewCount')
+        or item.get('views')
+        or item.get('snippet', {}).get('statistics', {}).get('viewCount')
+        or 0
+    )
+
+    return {
+        'id': str(uuid.uuid4()),
+        'title': title,
+        'sourcePlatform': source_platform,
+        'metrics': f"{_format_number(metrics_value)} Views",
+        'linkUrl': link_url,
+    }
+
+
 def verify_user(authorization: str):
     if not authorization or not authorization.startswith('Bearer '):
         raise APIError(401, 'Missing or invalid token')
@@ -160,21 +199,30 @@ def get_trends():
         )
 
         yt_response.raise_for_status()
-        shorts = yt_response.json().get('data', [])
+        yt_data = yt_response.json()
+        youtube_candidates = []
 
-        for short in shorts[:5]:
-            title = short.get('title', 'Trending YouTube Short')
+        if isinstance(yt_data, dict):
+            for key in ('data', 'items', 'videos', 'results', 'shorts', 'trendingVideos'):
+                value = yt_data.get(key)
+                if isinstance(value, list):
+                    youtube_candidates = value
+                    break
+                if isinstance(value, dict):
+                    for inner_key in ('data', 'items', 'videos', 'results'):
+                        inner_value = value.get(inner_key)
+                        if isinstance(inner_value, list):
+                            youtube_candidates = inner_value
+                            break
+                    if youtube_candidates:
+                        break
+        elif isinstance(yt_data, list):
+            youtube_candidates = yt_data
 
-            if len(title) > 75:
-                title = title[:72] + '...'
-
-            trends.append({
-                'id': str(uuid.uuid4()),
-                'title': title,
-                'sourcePlatform': 'YouTube Shorts',
-                'metrics': f"{_format_number(short.get('viewCount', 0))} Views",
-                'linkUrl': short.get('url', '#'),
-            })
+        for short in youtube_candidates[:5]:
+            normalized = _normalize_trend_item(short, 'YouTube Shorts')
+            if normalized:
+                trends.append(normalized)
 
     except Exception as yt_error:
         print(f'[YOUTUBE API ERROR]: {yt_error}')

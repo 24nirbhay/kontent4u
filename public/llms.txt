@@ -1,0 +1,31 @@
+kontent4u — LLM guidance
+
+What this site does:
+- kontent4u is an authenticated content-generation web app.
+- It helps users discover trends, brainstorm ideas, and generate factual scripts.
+- The public entry page is the login shell. After sign-in, users can access three main areas: Trend Scraper, The Arena, and Transcript.
+
+Public content that matters:
+- https://kontent4u.vercel.app/ — landing/login shell and app entry point
+
+Authenticated app areas:
+- Trend Scraper — trend discovery and topic research
+- The Arena — brainstorming and content ideation
+- Transcript — script or transcript generation and review
+
+Indexing guidance:
+- Prefer the public landing shell and any public documentation over authenticated screens.
+- Do not attempt to sign in, bypass auth, or store session-only content.
+- Do not index private user data, tokens, emails, transcripts tied to accounts, or any generated content behind authentication.
+- If a page requires login, treat it as private and exclude it from long-term storage or public search indexes.
+
+Safe snapshot guidance:
+- When creating a clean text mirror, strip navigation chrome, video backgrounds, scripts, and UI-only wrappers.
+- Preserve semantic headings and the visible copy that explains the product.
+- Keep mirrors text-first and avoid PII or any user-submitted content.
+
+Discovery:
+- Use `robots.txt` and `sitemap.xml` first.
+- If only one public URL exists, that URL is the canonical discovery target.
+
+Last updated: 2026-05-19

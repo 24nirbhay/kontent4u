@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  kontent4u sitemap and walkthrough
+
+  What to include:
+  - Public URLs only.
+  - For this app, the primary public entry is the login/landing shell.
+  - Do not add authenticated app states, private transcripts, session data, or API endpoints.
+
+  How to maintain:
+  - Update <lastmod> whenever the public shell copy changes.
+  - If you later add real routes, add each canonical route here.
+  - Keep the URL set small and meaningful.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://kontent4u.vercel.app/</loc>
+    <priority>1.00</priority>
+    <changefreq>weekly</changefreq>
+    <lastmod>2026-05-19</lastmod>
+  </url>
+</urlset>

@@ -59,8 +59,8 @@ export default function TabB({ session }) {
         }, 
         body: JSON.stringify({ 
           userPrompt: targetAudienceProfile, 
-          targetAudience: targetAudienceProfile, 
-          derivedTrendContext: tone 
+          targetAudience: targetAudienceProfile,
+          tone: tone
         }) 
       }); 
       
@@ -147,7 +147,7 @@ export default function TabB({ session }) {
       <div className='flex flex-col gap-3 md:flex-row md:items-end mb-2'>
         <div className='flex-1 relative'>
           <User className='absolute left-3 top-3 text-gray-400' size={18} />
-          <input type='text' value={targetAudienceProfile} onChange={(e) => setTargetAudienceProfile(e.target.value)} placeholder='Who is this for? e.g. gym owners, students, gamers' className='w-full bg-black/50 border border-white/10 rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:border-[#00f3ff] transition' />
+          <input type='text' value={targetAudienceProfile} onChange={(e) => setTargetAudienceProfile(e.target.value)} placeholder='Enter topic-be brief' className='w-full bg-black/50 border border-white/10 rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:border-[#00f3ff] transition' />
         </div>
         <div className='flex-1 relative'>
           <Settings className='absolute left-3 top-3 text-gray-400' size={18} />

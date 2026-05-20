@@ -17,7 +17,7 @@ export default function TabB({ session }) {
   const [triesLeft, setTriesLeft] = useState(3);
   const [shorts, setShorts] = useState([]);
   const [shortsLoading, setShortsLoading] = useState(false);
-  const [shortsState, setShortsState] = useState('Enter a topic and Run Arena to load related Shorts.');
+ 
 
   useEffect(() => {
     const loadUsage = async () => {
@@ -346,17 +346,12 @@ export default function TabB({ session }) {
       <div className='mt-6'>
         <div className='flex items-center justify-between mb-3'>
           <div>
-            <h3 className='text-sm font-bold text-gray-300'>Trending YouTube Shorts</h3>
-            <p className='text-xs text-gray-500'>Related Shorts for your current topic (live search)</p>
+            <h3 className='text-sm font-bold text-gray-300'></h3>
+            <p className='text-xs text-gray-500'></p>
           </div>
 
           <div className='flex items-center gap-2'>
-            <button
-              onClick={() => fetchShorts(targetAudienceProfile)}
-              className='px-3 py-1 rounded bg-[#00f3ff]/10 border border-[#00f3ff]/30 text-[#00f3ff] text-sm hover:bg-[#00f3ff]/20 transition'
-            >
-              Refresh Shorts
-            </button>
+            
           </div>
         </div>
 
@@ -366,7 +361,7 @@ export default function TabB({ session }) {
           {shortsLoading ? (
             <div className='text-[#00f3ff] animate-pulse'>Loading Shorts...</div>
           ) : shorts.length === 0 ? (
-            <div className='text-gray-400'>No Shorts to display.</div>
+            <div className='text-gray-400'></div>
           ) : (
             shorts.map((trend) => (
               <div key={trend.id} className='bg-black/50 border border-white/10 rounded-xl p-3 sm:p-4 flex flex-col justify-between gap-3 group hover:border-[#00f3ff]/50 transition-transform duration-300 hover:-translate-y-1'>
@@ -382,7 +377,7 @@ export default function TabB({ session }) {
                     />
 
                     <div className='pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-2 text-[11px] text-white/70'>
-                      Embedded short preview
+                    
                     </div>
                   </div>
                 )}

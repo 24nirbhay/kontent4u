@@ -21,4 +21,5 @@ class handler(BaseHTTPRequestHandler):
         except json.JSONDecodeError:
             write_json(self, 400, {'detail': 'Invalid JSON payload'})
         except Exception as error:
-            write_json(self, 500, {'detail': str(error)})
+            print(f'[BRAINSTORM API ERROR]: {error}')
+            write_json(self, 500, {'detail': 'Internal server error'})

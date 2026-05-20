@@ -209,7 +209,7 @@ export default function TabC({ session }) {
         </div>
 
         <div className='bg-black/40 border border-white/10 rounded-xl p-4 flex flex-col min-h-[320px]'>
-          <h3 className='text-sm font-bold text-gray-400 mb-3 flex items-center gap-2'><Sparkles size={16} /> Quick Actions</h3>
+          <h3 className='text-sm font-bold text-gray-400 mb-3 flex items-center gap-2'><Sparkles size={16} /> TIPS</h3>
 
           <div className='space-y-3 text-sm text-gray-300'>
             <div className='p-3 rounded-lg border border-white/10 bg-white/5'>
@@ -219,7 +219,7 @@ export default function TabC({ session }) {
               If the transcript is queued, the app will poll automatically until it is ready.
             </div>
             <div className='p-3 rounded-lg border border-white/10 bg-white/5'>
-              The API key stays on the server through the Vercel backend route.
+              Typical wait time is 1 minute.
             </div>
           </div>
 

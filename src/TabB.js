@@ -60,6 +60,7 @@ export default function TabB({ session }) {
         body: JSON.stringify({ 
           userPrompt: targetAudienceProfile, 
           targetAudience: targetAudienceProfile,
+          derivedTrendContext: tone,
           tone: tone
         }) 
       }); 

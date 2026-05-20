@@ -4,7 +4,7 @@ import { Play, Copy, Check, Terminal, Activity, User, Settings, Save, Sparkles, 
 import { supabase } from './Auth'; // Importing the existing client from your Auth file
 
 export default function TabB({ session }) {
-  const { targetAudienceProfile, setTargetAudienceProfile, arenaAgentTurnState, setArenaAgentTurnState, finalGeneratedScript, setFinalGeneratedScript } = useAppStore(); 
+  const { targetAudienceProfile, setTargetAudienceProfile, arenaAgentTurnState, setArenaAgentTurnState, finalGeneratedScript, setFinalGeneratedScript, setActiveTab, setScrapedTrendsCache } = useAppStore(); 
   const apiBase = (
     process.env.REACT_APP_BACKEND_URL ||
     (window.location.hostname === 'localhost' ? 'http://localhost:5000' : '')
@@ -15,6 +15,9 @@ export default function TabB({ session }) {
   const [copied, setCopied] = useState(false); 
   const [isSaving, setIsSaving] = useState(false); // New state for the save button
   const [triesLeft, setTriesLeft] = useState(3);
+  const [shorts, setShorts] = useState([]);
+  const [shortsLoading, setShortsLoading] = useState(false);
+  const [shortsState, setShortsState] = useState('Enter a topic and Run Arena to load related Shorts.');
 
   useEffect(() => {
     const loadUsage = async () => {
@@ -91,7 +94,9 @@ export default function TabB({ session }) {
         setArenaAgentTurnState(3); 
         setTimeout(() => { 
           setFinalGeneratedScript(data.finalScript); 
-          setIsProcessing(false); 
+              // fetch related shorts for the completed topic
+              try { fetchShorts(normalizedProfile); } catch (e) { }
+              setIsProcessing(false); 
           setArenaAgentTurnState(0); 
         }, 1500); 
       }, 1500); 
@@ -147,6 +152,65 @@ export default function TabB({ session }) {
   };
 
   const showProcessingSkeleton = isProcessing && !finalGeneratedScript;
+
+  // Fetch related YouTube Shorts for a given topic using scrapecreators API
+  const fetchShorts = async (topic) => {
+    const q = (topic || targetAudienceProfile || '').trim();
+    if (!q) {
+      setShorts([]);
+      setShortsState('No topic to search.');
+      return;
+    }
+
+    setShortsLoading(true);
+    setShortsState(`Searching Shorts for "${q}"...`);
+
+    try {
+      const url = `https://api.scrapecreators.com/v1/youtube/search?query=${encodeURIComponent(q)}&sortBy=popular&type=shorts`;
+      const res = await fetch(url);
+
+      if (!res.ok) throw new Error('Remote fetch failed');
+
+      const data = await res.json();
+
+      let items = [];
+      if (Array.isArray(data)) items = data;
+      else if (Array.isArray(data?.data)) items = data.data;
+      else if (Array.isArray(data?.items)) items = data.items;
+      else if (Array.isArray(data?.results)) items = data.results;
+
+      const mapped = items.slice(0, 9).map((it, idx) => {
+        const title = it.title || it.videoTitle || it.name || (it.snippet && it.snippet.title) || 'YouTube Short';
+        const linkUrl = it.url || it.link || it.videoUrl || (it.snippet && it.snippet.link) || it.linkUrl || '#';
+        const videoId = it.videoId || (it.snippet && (it.snippet.videoId || it.snippet.resourceId?.videoId)) || null;
+        const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&autoplay=0&mute=1&controls=1` : (it.embedUrl || null);
+
+        return {
+          id: it.id || it.videoId || `${Date.now()}-${idx}`,
+          title,
+          linkUrl,
+          embedUrl,
+          sourcePlatform: it.sourcePlatform || 'YouTube Shorts',
+          metrics: it.metrics || (it.viewCount ? `${it.viewCount} views` : ''),
+        };
+      });
+
+      if (mapped.length === 0) {
+        setShorts([]);
+        setShortsState('No Shorts found for this topic.');
+      } else {
+        setShorts(mapped);
+        setShortsState(`Showing ${mapped.length} Shorts for "${q}"`);
+        if (setScrapedTrendsCache) setScrapedTrendsCache(mapped);
+      }
+    } catch (err) {
+      console.error('Failed to fetch shorts:', err);
+      setShorts([]);
+      setShortsState('Failed to load Shorts.');
+    } finally {
+      setShortsLoading(false);
+    }
+  };
 
   return (
     <div className='flex flex-col h-full text-white space-y-4 overflow-y-auto pb-4'>
@@ -277,6 +341,80 @@ export default function TabB({ session }) {
           </div>
         </div>
       )}
+
+      {/* Trending Shorts Section */}
+      <div className='mt-6'>
+        <div className='flex items-center justify-between mb-3'>
+          <div>
+            <h3 className='text-sm font-bold text-gray-300'>Trending YouTube Shorts</h3>
+            <p className='text-xs text-gray-500'>Related Shorts for your current topic (live search)</p>
+          </div>
+
+          <div className='flex items-center gap-2'>
+            <button
+              onClick={() => fetchShorts(targetAudienceProfile)}
+              className='px-3 py-1 rounded bg-[#00f3ff]/10 border border-[#00f3ff]/30 text-[#00f3ff] text-sm hover:bg-[#00f3ff]/20 transition'
+            >
+              Refresh Shorts
+            </button>
+          </div>
+        </div>
+
+        <div className='text-xs text-gray-400 mb-2'>{shortsState}</div>
+
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+          {shortsLoading ? (
+            <div className='text-[#00f3ff] animate-pulse'>Loading Shorts...</div>
+          ) : shorts.length === 0 ? (
+            <div className='text-gray-400'>No Shorts to display.</div>
+          ) : (
+            shorts.map((trend) => (
+              <div key={trend.id} className='bg-black/50 border border-white/10 rounded-xl p-3 sm:p-4 flex flex-col justify-between gap-3 group hover:border-[#00f3ff]/50 transition-transform duration-300 hover:-translate-y-1'>
+                {trend.embedUrl && (
+                  <div className='overflow-hidden rounded-lg border border-white/10 bg-black/70 aspect-video relative'>
+                    <iframe
+                      title={trend.title}
+                      src={trend.embedUrl}
+                      className='absolute inset-0 h-full w-full'
+                      allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+                      referrerPolicy='strict-origin-when-cross-origin'
+                      loading='lazy'
+                    />
+
+                    <div className='pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-2 text-[11px] text-white/70'>
+                      Embedded short preview
+                    </div>
+                  </div>
+                )}
+
+                <div className='space-y-3'>
+                  <div className='flex justify-between items-start gap-3'>
+                    <span className='text-[11px] sm:text-xs font-semibold px-2 py-1 bg-white/10 rounded text-gray-300 shrink-0'>
+                      {trend.sourcePlatform}
+                    </span>
+
+                    <a href={trend.linkUrl} target='_blank' rel='noreferrer' className='text-gray-500 hover:text-[#00f3ff] transition shrink-0'>
+                      <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' viewBox='0 0 24 24'><path d='M14 3h7v7h-2V6.414l-9.293 9.293-1.414-1.414L17.586 5H14V3z'/><path d='M5 5h5V3H3v7h2V5zm0 14v-5H3v7h7v-2H5z'/></svg>
+                    </a>
+                  </div>
+
+                  <h4 className='font-bold text-base sm:text-lg leading-tight line-clamp-2'>{trend.title}</h4>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setTargetAudienceProfile('Context Idea based on trend: ' + trend.title);
+                    setActiveTab('The Arena');
+                  }}
+                  className='w-full py-2 bg-white/5 hover:bg-[#00f3ff]/20 text-[#00f3ff] border border-white/10 hover:border-[#00f3ff]/50 rounded-lg flex items-center justify-center gap-2 transition text-sm font-medium'
+                >
+                  Use in Arena
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   );
 }

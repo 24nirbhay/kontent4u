@@ -111,9 +111,7 @@ export default function TabA() {
                     loading='lazy'
                   />
 
-                  <div className='pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-2 text-[11px] text-white/70'>
-                    Embedded short preview
-                  </div>
+                
                 </div>
               )}
 

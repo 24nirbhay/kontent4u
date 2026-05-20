@@ -375,10 +375,20 @@ def get_trends():
 def build_brainstorm_response(payload: dict, authorization: str):
     user_prompt = (payload.get('userPrompt') or '').strip()
     target_audience = (payload.get('targetAudience') or '').strip()
-    derived_trend_context = (payload.get('derivedTrendContext') or '').strip()
+    derived_trend_context = (
+        payload.get('derivedTrendContext')
+        or payload.get('tone')
+        or 'Professional'
+    ).strip()
 
-    if not user_prompt or not target_audience or not derived_trend_context:
-        raise APIError(400, 'Missing required brainstorm fields.')
+    missing_fields = []
+    if not user_prompt:
+        missing_fields.append('userPrompt')
+    if not target_audience:
+        missing_fields.append('targetAudience')
+
+    if missing_fields:
+        raise APIError(400, f"Missing required brainstorm fields: {', '.join(missing_fields)}")
 
     user = verify_user(authorization)
     current_count = check_daily_limit(user.email)

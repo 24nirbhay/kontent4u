@@ -44,7 +44,12 @@ export default function TabB({ session }) {
   }, [apiBase, session?.access_token]);
 
   const runSim = async () => { 
-    if(!targetAudienceProfile) return alert('Please enter a target audience/topic first!'); 
+    const normalizedProfile = (targetAudienceProfile || '').trim();
+    const normalizedTone = (tone || 'Professional').trim();
+
+    if (!normalizedProfile) return alert('Please enter a target audience/topic first!');
+    if (!normalizedTone) return alert('Please select a tone first!');
+
     setIsProcessing(true); 
     setLogs(['[SYSTEM] Initializing Arena...', '[LOG] Verifying Credentials...']); 
     setArenaAgentTurnState(1); 
@@ -58,10 +63,10 @@ export default function TabB({ session }) {
           'Authorization': `Bearer ${session?.access_token || ''}` 
         }, 
         body: JSON.stringify({ 
-          userPrompt: targetAudienceProfile, 
-          targetAudience: targetAudienceProfile,
-          derivedTrendContext: tone,
-          tone: tone
+          userPrompt: normalizedProfile, 
+          targetAudience: normalizedProfile,
+          derivedTrendContext: normalizedTone,
+          tone: normalizedTone
         }) 
       }); 
       
@@ -174,8 +179,16 @@ export default function TabB({ session }) {
         <div className='bg-black/40 border border-white/10 rounded-xl p-4 flex flex-col min-h-[250px]'>
           <h3 className='text-sm font-bold text-gray-400 mb-3 flex items-center gap-2'><Terminal size={16} /> Agent Dialogue</h3>
           <div className='flex-1 overflow-y-auto space-y-3'>
-            <div className={'p-3 rounded border flex items-center gap-3 transition ' + (arenaAgentTurnState >= 1 ? 'border-blue-500/50 bg-blue-500/10 text-white shadow-[0_0_20px_rgba(59,130,246,0.12)]' : 'border-white/5 text-gray-600')}>
-              <span className={'flex h-9 w-9 items-center justify-center rounded-full border ' + (arenaAgentTurnState >= 1 ? 'border-blue-400/60 bg-blue-400/10 text-blue-200' : 'border-white/10 bg-white/5')}>
+            <div
+              className={
+                'p-3 rounded border flex items-center gap-3 transition ' +
+                (arenaAgentTurnState >= 1 ? 'border-blue-500/50 bg-blue-500/10 text-white shadow-[0_0_20px_rgba(59,130,246,0.12)]' : 'border-white/5 text-gray-600') +
+                (isProcessing && arenaAgentTurnState >= 1 ? ' agent-ghost' : '') +
+                (isProcessing && arenaAgentTurnState < 1 ? ' soft-float border-white/15 bg-white/[0.03] text-gray-400' : '')
+              }
+              style={isProcessing && arenaAgentTurnState >= 1 ? { animationDelay: '0ms' } : undefined}
+            >
+              <span className={'flex h-9 w-9 items-center justify-center rounded-full border ' + (arenaAgentTurnState >= 1 ? 'border-blue-400/60 bg-blue-400/10 text-blue-200' : 'border-white/10 bg-white/5') + (isProcessing && arenaAgentTurnState >= 1 ? ' agent-orb' : '')}>
                 <Sparkles size={16} className={arenaAgentTurnState >= 1 ? 'animate-pulse' : ''} />
               </span>
               <div>
@@ -183,8 +196,16 @@ export default function TabB({ session }) {
                 <div className='text-xs'>{arenaAgentTurnState >= 1 ? 'Drafting script skeleton...' : 'Waiting...'}</div>
               </div>
             </div>
-            <div className={'p-3 rounded border flex items-center gap-3 transition ' + (arenaAgentTurnState >= 2 ? 'border-yellow-500/50 bg-yellow-500/10 text-white shadow-[0_0_20px_rgba(234,179,8,0.12)]' : 'border-white/5 text-gray-600')}>
-              <span className={'flex h-9 w-9 items-center justify-center rounded-full border ' + (arenaAgentTurnState >= 2 ? 'border-yellow-400/60 bg-yellow-400/10 text-yellow-200' : 'border-white/10 bg-white/5')}>
+            <div
+              className={
+                'p-3 rounded border flex items-center gap-3 transition ' +
+                (arenaAgentTurnState >= 2 ? 'border-yellow-500/50 bg-yellow-500/10 text-white shadow-[0_0_20px_rgba(234,179,8,0.12)]' : 'border-white/5 text-gray-600') +
+                (isProcessing && arenaAgentTurnState >= 2 ? ' agent-ghost' : '') +
+                (isProcessing && arenaAgentTurnState < 2 ? ' soft-float border-white/15 bg-white/[0.03] text-gray-400' : '')
+              }
+              style={isProcessing && arenaAgentTurnState >= 2 ? { animationDelay: '180ms' } : undefined}
+            >
+              <span className={'flex h-9 w-9 items-center justify-center rounded-full border ' + (arenaAgentTurnState >= 2 ? 'border-yellow-400/60 bg-yellow-400/10 text-yellow-200' : 'border-white/10 bg-white/5') + (isProcessing && arenaAgentTurnState >= 2 ? ' agent-orb' : '')}>
                 <Activity size={16} className={arenaAgentTurnState >= 2 ? 'animate-pulse' : ''} />
               </span>
               <div>
@@ -192,8 +213,16 @@ export default function TabB({ session }) {
                 <div className='text-xs'>{arenaAgentTurnState >= 2 ? 'Cross-referencing facts...' : 'Waiting...'}</div>
               </div>
             </div>
-            <div className={'p-3 rounded border flex items-center gap-3 transition ' + (arenaAgentTurnState >= 3 ? 'border-green-500/50 bg-green-500/10 text-white shadow-[0_0_20px_rgba(34,197,94,0.12)]' : 'border-white/5 text-gray-600')}>
-              <span className={'flex h-9 w-9 items-center justify-center rounded-full border ' + (arenaAgentTurnState >= 3 ? 'border-green-400/60 bg-green-400/10 text-green-200' : 'border-white/10 bg-white/5')}>
+            <div
+              className={
+                'p-3 rounded border flex items-center gap-3 transition ' +
+                (arenaAgentTurnState >= 3 ? 'border-green-500/50 bg-green-500/10 text-white shadow-[0_0_20px_rgba(34,197,94,0.12)]' : 'border-white/5 text-gray-600') +
+                (isProcessing && arenaAgentTurnState >= 3 ? ' agent-ghost' : '') +
+                (isProcessing && arenaAgentTurnState < 3 ? ' soft-float border-white/15 bg-white/[0.03] text-gray-400' : '')
+              }
+              style={isProcessing && arenaAgentTurnState >= 3 ? { animationDelay: '320ms' } : undefined}
+            >
+              <span className={'flex h-9 w-9 items-center justify-center rounded-full border ' + (arenaAgentTurnState >= 3 ? 'border-green-400/60 bg-green-400/10 text-green-200' : 'border-white/10 bg-white/5') + (isProcessing && arenaAgentTurnState >= 3 ? ' agent-orb' : '')}>
                 <ShieldCheck size={16} className={arenaAgentTurnState >= 3 ? 'animate-pulse' : ''} />
               </span>
               <div>

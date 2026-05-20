@@ -11,10 +11,14 @@ export default function App() {
   const { activeTab, setActiveTab } = useAppStore();
   const [session, setSession] = useState(null);
   const [isInitializing, setIsInitializing] = useState(true);
+  const showAuth = useAppStore((s) => s.showAuth);
+  const closeAuth = useAppStore((s) => s.closeAuth);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      // If a session exists (OAuth redirect completed), ensure auth modal is closed
+      if (session) closeAuth();
       setIsInitializing(false);
     });
 
@@ -22,6 +26,8 @@ export default function App() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      // close modal automatically when a session becomes available
+      if (session) closeAuth();
       setIsInitializing(false);
     });
 
@@ -32,34 +38,6 @@ export default function App() {
     return (
       <div className="h-screen w-screen bg-black flex items-center justify-center text-[#00f3ff] font-mono text-sm animate-pulse">
         ek sec rav load zata...
-      </div>
-    );
-  }
-
-  if (!session) {
-    return (
-      <div className="relative min-h-screen bg-black overflow-hidden">
-
-        {/* BACKGROUND VIDEO */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover z-0 opacity-95 scale-105"
-        >
-          <source src="/cherrymine.mp4" type="video/mp4" />
-        </video>
-
-        {/* SOFT CINEMATIC OVERLAY */}
-        <div className="absolute inset-0 bg-black/50 z-[1]" />
-
-        {/* LOGIN CONTENT */}
-        <div className="relative z-10 px-4 sm:px-6 py-4 sm:py-8">
-          <Auth onLogin={setSession} />
-        </div>
-        <Analytics />
-        <SpeedInsights />
       </div>
     );
   }
@@ -84,6 +62,14 @@ export default function App() {
 
     <div className="relative z-10 flex flex-col min-h-screen">
 
+      {/* Small toast explaining why auth modal opened for unauthenticated users */}
+      {showAuth && !session && (
+        <div className="fixed top-4 right-4 z-60 bg-black/70 border border-white/10 text-sm text-gray-200 px-3 py-2 rounded-lg shadow-md flex items-center gap-3">
+          <div>Please sign in to use protected features (e.g. Arena).</div>
+          <button onClick={() => closeAuth()} className="text-xs text-[#00f3ff] px-2 py-1 rounded hover:bg-white/5">Close</button>
+        </div>
+      )}
+
       {/* HEADER */}
       <header className="px-4 py-3 md:px-5 md:py-3 flex items-center justify-between gap-3 bg-black/35 border-b border-white/10 sticky top-0 z-50 backdrop-blur-md">
 
@@ -92,18 +78,27 @@ export default function App() {
         </h1>
 
         <div className="flex items-center justify-end gap-2 sm:gap-3 shrink-0">
+          {session ? (
+            <>
+              <span className="hidden md:block text-[11px] text-gray-300 max-w-[220px] truncate">
+                {session.user.email}
+              </span>
 
-          <span className="hidden md:block text-[11px] text-gray-300 max-w-[220px] truncate">
-            {session.user.email}
-          </span>
-
-          <button
-            onClick={() => supabase.auth.signOut()}
-            className="px-3 py-1.5 bg-red-500/10 text-red-300 hover:bg-red-500/20 border border-red-500/20 rounded-lg transition text-xs font-medium whitespace-nowrap"
-          >
-            Sign Out
-          </button>
-
+              <button
+                onClick={() => supabase.auth.signOut()}
+                className="px-3 py-1.5 bg-red-500/10 text-red-300 hover:bg-red-500/20 border border-red-500/20 rounded-lg transition text-xs font-medium whitespace-nowrap"
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => useAppStore.getState().openAuth()}
+              className="px-3 py-1.5 bg-[#00f3ff]/20 text-[#00f3ff] hover:bg-[#00f3ff]/40 border border-[#00f3ff]/30 rounded-lg transition text-xs font-medium whitespace-nowrap"
+            >
+              Sign In
+            </button>
+          )}
         </div>
       </header>
 
@@ -164,6 +159,9 @@ export default function App() {
             {activeTab === "Transcript" && (
               <TabC session={session} />
             )}
+
+            {/* Auth modal can be opened from any tab via the store (openAuth) */}
+            {showAuth && <Auth onLogin={(s) => { setSession(s); closeAuth(); }} />}
 
           </div>
 

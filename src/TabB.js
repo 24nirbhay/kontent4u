@@ -4,7 +4,7 @@ import { Play, Copy, Check, Terminal, Activity, User, Settings, Save, Sparkles, 
 import { supabase } from './Auth'; // Importing the existing client from your Auth file
 
 export default function TabB({ session }) {
-  const { targetAudienceProfile, setTargetAudienceProfile, arenaAgentTurnState, setArenaAgentTurnState, finalGeneratedScript, setFinalGeneratedScript, setActiveTab, setScrapedTrendsCache } = useAppStore(); 
+  const { targetAudienceProfile, setTargetAudienceProfile, arenaAgentTurnState, setArenaAgentTurnState, finalGeneratedScript, setFinalGeneratedScript, setActiveTab, setScrapedTrendsCache, openAuth } = useAppStore(); 
   const apiBase = (
     process.env.REACT_APP_BACKEND_URL ||
     (window.location.hostname === 'localhost' ? 'http://localhost:5000' : '')
@@ -17,6 +17,7 @@ export default function TabB({ session }) {
   const [triesLeft, setTriesLeft] = useState(3);
   const [shorts, setShorts] = useState([]);
   const [shortsLoading, setShortsLoading] = useState(false);
+  const [shortsState, setShortsState] = useState('');
  
 
   useEffect(() => {
@@ -47,6 +48,11 @@ export default function TabB({ session }) {
   }, [apiBase, session?.access_token]);
 
   const runSim = async () => { 
+    if (!session) {
+      // lightweight redirect to login when unauthenticated
+      openAuth();
+      return;
+    }
     const normalizedProfile = (targetAudienceProfile || '').trim();
     const normalizedTone = (tone || 'Professional').trim();
 
@@ -108,7 +114,7 @@ export default function TabB({ session }) {
     } 
   }; 
 
-  const handleCopy = () => { 
+    const handleCopy = () => { 
     navigator.clipboard.writeText(finalGeneratedScript); 
     setCopied(true); 
     setTimeout(() => setCopied(false), 2000); 
@@ -122,7 +128,8 @@ export default function TabB({ session }) {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       
       if (userError || !user) {
-        alert("You must be logged in to save scripts!");
+        // redirect to login modal for a simpler flow
+        openAuth();
         setIsSaving(false);
         return;
       }
@@ -217,7 +224,14 @@ export default function TabB({ session }) {
       <div className='flex flex-col gap-3 md:flex-row md:items-end mb-2'>
         <div className='flex-1 relative'>
           <User className='absolute left-3 top-3 text-gray-400' size={18} />
-          <input type='text' value={targetAudienceProfile} onChange={(e) => setTargetAudienceProfile(e.target.value)} placeholder='Enter topic-be brief' className='w-full bg-black/50 border border-white/10 rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:border-[#00f3ff] transition' />
+          <input
+            type='text'
+            value={targetAudienceProfile}
+            onFocus={() => { if (!session) openAuth(); }}
+            onChange={(e) => setTargetAudienceProfile(e.target.value)}
+            placeholder='Enter topic-be brief'
+            className='w-full bg-black/50 border border-white/10 rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:border-[#00f3ff] transition'
+          />
         </div>
         <div className='flex-1 relative'>
           <Settings className='absolute left-3 top-3 text-gray-400' size={18} />

@@ -18,7 +18,7 @@ export default function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       // If a session exists (OAuth redirect completed), ensure auth modal is closed
-      if (session) closeAuth();
+      if (session) useAppStore.getState().closeAuth();
       setIsInitializing(false);
     });
 
@@ -27,7 +27,7 @@ export default function App() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       // close modal automatically when a session becomes available
-      if (session) closeAuth();
+      if (session) useAppStore.getState().closeAuth();
       setIsInitializing(false);
     });
 

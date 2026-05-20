@@ -360,12 +360,12 @@ export default function TabB({ session }) {
       <div className='mt-6'>
         <div className='flex items-center justify-between mb-3'>
           <div>
-            <h3 className='text-sm font-bold text-gray-300'></h3>
-            <p className='text-xs text-gray-500'></p>
+            <h3 className='text-sm font-bold text-gray-300'>Trending Shorts</h3>
+            <p className='text-xs text-gray-500'>Related YouTube Shorts for the generated topic</p>
           </div>
 
           <div className='flex items-center gap-2'>
-            
+
           </div>
         </div>
 
